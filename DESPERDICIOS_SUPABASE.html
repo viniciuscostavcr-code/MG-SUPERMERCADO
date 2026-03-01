@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7B1E1E">
+<title>🗑️ Desperdícios — M. Graças (Supabase)</title>
+<style>
+:root{
+  --bg:#FBF5EE;--white:#FFF;--brown:#3D1C0A;--brown2:#6B3A1F;
+  --gold:#C8960C;--gold-l:#F5E6C0;--cream:#FAF0DC;
+  --red:#7B1E1E;--red2:#A93226;--red-l:#FADBD8;--red-ll:#FDF2F1;
+  --green:#1A5E38;--green-l:#D4EFDF;
+  --blue:#1A3E6B;--blue-l:#D6EAF8;
+  --gray:#7F8C8D;--gray-l:#F2F3F4;
+  --sh:0 2px 16px rgba(61,28,10,.10);--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--brown);display:flex;flex-direction:column;}
+
+/* HEADER */
+header{background:var(--red);color:#fff;padding:14px 16px 10px;flex-shrink:0;}
+.h-top{display:flex;align-items:center;justify-content:space-between;}
+.h-top h1{font-size:1.05rem;font-weight:800;}
+.h-badge{background:var(--gold);color:var(--brown);font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.h-sub{font-size:.7rem;opacity:.7;margin-top:2px;}
+.h-meta{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.h-chip{background:rgba(255,255,255,.18);font-size:.72rem;padding:4px 10px;border-radius:20px;}
+.h-chip.hi{background:rgba(255,255,255,.3);font-weight:600;}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:4px;}
+.dot.off{background:#f44336;}
+.dot.wait{background:var(--gold);}
+
+/* TABS */
+.tabs{display:flex;background:var(--red2);flex-shrink:0;}
+.tab{flex:1;text-align:center;padding:10px 2px;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:3px solid transparent;transition:.15s;}
+.tab.on{color:#fff;border-bottom-color:var(--gold);}
+
+/* SCROLL */
+.scr{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 100px;}
+.vw{display:none;}.vw.on{display:block;}
+
+/* FORMS */
+.card{background:var(--white);border-radius:var(--r);padding:14px;box-shadow:var(--sh);margin-bottom:12px;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+lbl,label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--brown2);display:block;margin-bottom:4px;}
+select,input[type=date],input[type=text],input[type=number]{
+  width:100%;border:2px solid var(--gold-l);border-radius:9px;
+  padding:9px 11px;font-size:.9rem;color:var(--brown);background:var(--cream);
+  outline:none;appearance:none;-webkit-appearance:none;font-family:inherit;
+}
+select:focus,input:focus{border-color:var(--gold);background:#fff;}
+
+/* SETOR PILLS */
+.spills{display:flex;gap:7px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.spills::-webkit-scrollbar{display:none;}
+.sp{flex-shrink:0;padding:8px 14px;border-radius:10px;font-size:.73rem;font-weight:700;border:2px solid var(--gold-l);background:var(--white);color:var(--gray);cursor:pointer;transition:.15s;white-space:nowrap;}
+.sp.on{color:#fff;border-color:transparent;}
+.sp[data-s="TODOS"].on{background:var(--brown);}
+.sp[data-s="PADARIA"].on{background:var(--blue);}
+.sp[data-s="CONFEITARIA"].on{background:var(--red2);}
+.sp[data-s="LANCHONETE"].on{background:var(--green);}
+
+/* SEARCH */
+.sw{position:relative;margin-bottom:10px;}
+.sw input{width:100%;border:2px solid var(--gold-l);border-radius:10px;padding:10px 12px 10px 38px;font-size:.9rem;background:var(--white);box-shadow:var(--sh);outline:none;}
+.sw input:focus{border-color:var(--gold);}
+.si{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:1rem;opacity:.45;}
+
+/* SECTION HDR */
+.sh2{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin:4px 2px 8px;display:flex;justify-content:space-between;}
+
+/* PRODUCT CARD — nome sem corte */
+.pl{display:flex;flex-direction:column;gap:7px;}
+.pc{background:var(--white);border-radius:12px;padding:11px 12px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 1px 8px rgba(61,28,10,.06);border-left:4px solid var(--gold-l);transition:all .15s;}
+.pc.filled{border-left-color:var(--red2);}
+.pc[data-s="PADARIA"].filled{border-left-color:var(--blue);}
+.pc[data-s="CONFEITARIA"].filled{border-left-color:var(--red2);}
+.pc[data-s="LANCHONETE"].filled{border-left-color:var(--green);}
+
+.pfoto{width:44px;height:44px;border-radius:8px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:1.4rem;overflow:hidden;flex-shrink:0;border:2px solid var(--gold-l);margin-top:2px;}
+.pfoto img{width:100%;height:100%;object-fit:cover;}
+.pc.filled .pfoto{border-color:currentColor;}
+
+.pi{flex:1;min-width:0;}
+/* NOME COMPLETO — sem truncar */
+.pn{font-weight:600;font-size:.85rem;line-height:1.3;word-break:break-word;white-space:normal;}
+.pm{font-size:.65rem;color:var(--gray);margin-top:2px;}
+.stag{font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:5px;display:inline-block;margin-top:3px;}
+.stag.PADARIA{background:var(--blue-l);color:var(--blue);}
+.stag.CONFEITARIA{background:var(--red-l);color:var(--red);}
+.stag.LANCHONETE{background:var(--green-l);color:var(--green);}
+
+.pq{display:flex;align-items:center;gap:5px;flex-shrink:0;margin-top:10px;}
+.qb{width:32px;height:32px;border-radius:8px;border:2px solid var(--red-l);background:var(--red-ll);font-size:1rem;font-weight:700;color:var(--red2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.qb:active{background:var(--red-l);transform:scale(.9);}
+.qi{width:60px;text-align:center;border:2px solid var(--gold-l);border-radius:8px;padding:5px 3px;font-size:.92rem;font-weight:700;color:var(--brown);background:var(--cream);outline:none;}
+.qi:focus{border-color:var(--gold);background:#fff;}
+.qi.v{background:var(--red-ll);border-color:var(--red2);color:var(--red2);}
+
+/* EMPTY */
+.emp{text-align:center;padding:40px 20px;color:var(--gray);}
+.emp .big{font-size:2.2rem;margin-bottom:8px;}
+.emp p{font-size:.85rem;line-height:1.6;}
+
+/* BAR */
+.bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:2px solid var(--red-l);padding:11px 14px;display:flex;gap:9px;align-items:center;box-shadow:0 -4px 20px rgba(61,28,10,.12);z-index:100;}
+.bt{flex:1;}
+.bt strong{font-size:.95rem;font-weight:700;display:block;}
+.bt span{font-size:.72rem;color:var(--gray);}
+.bsv{background:var(--red);color:#fff;border:none;border-radius:11px;padding:12px 20px;font-size:.88rem;font-weight:700;cursor:pointer;}
+.bsv:active{transform:scale(.97);}
+.bsv:disabled{opacity:.35;cursor:not-allowed;}
+.bvw{background:var(--gold);color:var(--brown);border:none;border-radius:11px;padding:12px 14px;font-size:.82rem;font-weight:700;cursor:pointer;}
+
+/* TOAST */
+.tst{position:fixed;top:75px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--brown);color:#fff;padding:10px 20px;border-radius:24px;font-size:.84rem;font-weight:600;opacity:0;pointer-events:none;transition:.28s;z-index:999;white-space:nowrap;box-shadow:var(--sh);}
+.tst.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.tst.ok{background:var(--green);}
+.tst.er{background:var(--red2);}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;}
+.ov.on{display:flex;}
+.mo{background:var(--white);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 36px;animation:up .25s ease;}
+@keyframes up{from{transform:translateY(36px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{width:36px;height:4px;background:var(--red-l);border-radius:2px;margin:0 auto 18px;}
+.mt{font-size:1rem;font-weight:800;margin-bottom:14px;}
+.mi{display:flex;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--gold-l);gap:8px;}
+.mi:last-child{border:none;}
+.mi-info{flex:1;min-width:0;}
+.mi-nm{font-weight:600;font-size:.85rem;word-break:break-word;line-height:1.3;}
+.mi-mt{font-size:.68rem;color:var(--gray);margin-top:1px;}
+.mi-qty{font-weight:700;color:var(--red2);font-size:.95rem;flex-shrink:0;}
+.md{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--red2);padding:4px 8px;border-radius:6px;}
+.md:active{background:var(--red-l);}
+.mbtns{display:flex;gap:9px;margin-top:18px;}
+.mbtn{flex:1;border:none;border-radius:11px;padding:13px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;}
+.mbtn.gd{background:var(--gold);color:var(--brown);}
+.mbtn.gy{background:var(--gray-l);color:var(--brown);}
+
+/* HISTÓRICO */
+.hday{background:var(--white);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);}
+.hdtop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;}
+.hdinfo strong{font-size:.88rem;font-weight:700;display:block;}
+.hdinfo span{font-size:.7rem;color:var(--gray);}
+.hddel{background:var(--red-ll);border:none;cursor:pointer;font-size:.78rem;color:var(--red2);padding:5px 10px;border-radius:8px;font-weight:600;flex-shrink:0;}
+.hreg{display:flex;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--gold-l);gap:7px;}
+.hreg:last-child{border:none;}
+.hreg-l{flex:1;min-width:0;}
+.hreg-nm{font-size:.83rem;font-weight:500;word-break:break-word;line-height:1.3;}
+.hreg-r{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.hreg-qty{font-weight:700;color:var(--red2);font-size:.88rem;}
+.hreg-del{background:none;border:none;cursor:pointer;font-size:.9rem;color:var(--red2);padding:2px 6px;border-radius:5px;}
+.hreg-del:active{background:var(--red-l);}
+.hexp{width:100%;background:var(--gold);color:var(--brown);border:none;border-radius:10px;padding:12px;font-size:.88rem;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:inherit;}
+.hclr{width:100%;background:var(--red-l);color:var(--red2);border:none;border-radius:10px;padding:10px;font-size:.82rem;font-weight:700;cursor:pointer;margin-top:4px;font-family:inherit;}
+
+/* RESUMO */
+.rb{background:var(--white);border-radius:12px;padding:14px;box-shadow:var(--sh);margin-bottom:10px;}
+.rb h3{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gray);margin-bottom:10px;}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--gold-l);font-size:.84rem;gap:8px;}
+.rr:last-child{border:none;}
+.rr .rn{flex:1;word-break:break-word;}
+.rr .rv{font-weight:700;font-size:.9rem;flex-shrink:0;}
+.rr.PADARIA .rv{color:var(--blue);}
+.rr.CONFEITARIA .rv{color:var(--red2);}
+.rr.LANCHONETE .rv{color:var(--green);}
+
+/* CONFIGURAÇÕES */
+.cs{background:var(--white);border-radius:12px;padding:14px;box-shadow:var(--sh);margin-bottom:12px;}
+.cs-hdr{font-size:.8rem;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.cs-hdr span{font-size:.72rem;font-weight:400;color:var(--gray);}
+.ci{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--gold-l);}
+.ci:last-child{border:none;}
+.ci-foto{width:38px;height:38px;border-radius:8px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:1.2rem;overflow:hidden;flex-shrink:0;position:relative;cursor:pointer;}
+.ci-foto img{width:100%;height:100%;object-fit:cover;}
+.ci-foto input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0;}
+.ci-info{flex:1;min-width:0;}
+.ci-nm{font-size:.85rem;font-weight:600;word-break:break-word;}
+.ci-mt{font-size:.68rem;color:var(--gray);}
+.ci-del{background:none;border:none;cursor:pointer;color:var(--red2);font-size:1.1rem;padding:4px;flex-shrink:0;}
+.badd{width:100%;background:var(--cream);color:var(--brown);border:2px solid var(--gold-l);border-radius:10px;padding:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;}
+.badd:active{background:var(--gold-l);}
+.fadd{background:var(--cream);border-radius:10px;padding:12px;margin-top:10px;display:none;}
+.fadd.on{display:block;}
+.fadd-foto{width:64px;height:64px;border-radius:10px;background:var(--white);border:2px dashed var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;overflow:hidden;position:relative;margin:0 auto 12px;}
+.fadd-foto img{width:100%;height:100%;object-fit:cover;}
+.fadd-foto input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0;}
+.fg{margin-top:8px;}
+.fr{display:flex;gap:8px;margin-top:10px;}
+.bsave2{flex:1;background:var(--red);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;}
+.bcan{background:var(--gray-l);color:var(--brown);border:none;border-radius:9px;padding:10px;font-size:.85rem;cursor:pointer;font-family:inherit;}
+.sync-box{background:var(--blue-l);border-radius:10px;padding:12px;font-size:.8rem;color:var(--blue);line-height:1.6;margin-bottom:12px;}
+.sync-box strong{display:block;margin-bottom:4px;font-size:.85rem;}
+.bsync{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:11px;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-top">
+    <div>
+      <h1>🗑️ Controle de Desperdícios</h1>
+      <div class="h-sub">Mercadinho M. Graças</div>
+    </div>
+    <span class="h-badge" id="hBadge">0 itens</span>
+  </div>
+  <div class="h-meta">
+    <span class="h-chip hi" id="hDate">—</span>
+    <span class="h-chip"><span class="dot" id="syncDot"></span><span id="syncTxt">...</span></span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab on"  onclick="go('reg')">📝 Registrar</div>
+  <div class="tab"     onclick="go('hist')">📋 Histórico</div>
+  <div class="tab"     onclick="go('res')">📊 Resumo</div>
+  <div class="tab"     onclick="go('cfg')">⚙️ Config</div>
+</div>
+
+<div class="scr">
+
+  <!-- REGISTRAR -->
+  <div class="vw on" id="v-reg">
+    <div class="card">
+      <div class="r2">
+        <div><label>📅 Data</label><input type="date" id="iData" oninput="syncHdr()"></div>
+        <div><label>👤 Responsável</label><select id="iResp"></select></div>
+      </div>
+      <div class="fg"><label>📝 Motivo</label>
+        <select id="iMot">
+          <option value="VENCIDO">🕐 Produto Vencido</option>
+          <option value="SOBRA">🍽️ Sobra do Dia</option>
+          <option value="QUEIMADO">🔥 Queimado no Forno</option>
+          <option value="DANIFICADO">💥 Danificado</option>
+          <option value="QUEDA">📦 Queda / Acidente</option>
+          <option value="OUTRO">❓ Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="spills" id="spills"></div>
+    <div class="sw"><span class="si">🔍</span><input type="text" id="iSrc" placeholder="Buscar produto pelo nome completo..." oninput="render()"></div>
+    <div class="sh2"><span id="lLbl">Todos os produtos</span><span id="lCnt" style="color:var(--brown)"></span></div>
+    <div class="pl" id="pList"></div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="vw" id="v-hist"><div id="histC"></div></div>
+
+  <!-- RESUMO -->
+  <div class="vw" id="v-res"><div id="resC"></div></div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div class="vw" id="v-cfg">
+
+    <div class="cs">
+      <div class="cs-hdr">☁️ Sincronização entre celulares</div>
+      <div class="sync-box">
+        <strong>Como usar nos 3 celulares:</strong>
+        1. Salve este arquivo no <strong>Google Drive</strong><br>
+        2. No celular: abra o Drive → toque no arquivo → 3 pontos → <strong>"Abrir com" → Chrome</strong><br>
+        3. Faça isso nos 3 celulares — todos compartilham os mesmos dados!<br><br>
+        Status: <strong id="cfgSync">Verificando...</strong>
+      </div>
+      <button class="bsync" onclick="forceSync()">🔄 Sincronizar agora</button>
+    </div>
+
+    <div class="cs">
+      <div class="cs-hdr">👥 Responsáveis <span id="rCnt"></span></div>
+      <div id="rList"></div>
+      <button class="badd" onclick="tog('fResp')">+ Adicionar responsável</button>
+      <div class="fadd" id="fResp">
+        <div><label>Nome</label><input type="text" id="nResp" placeholder="Ex: CARLOS"></div>
+        <div class="fr">
+          <button class="bsave2" onclick="addResp()">✅ Salvar</button>
+          <button class="bcan" onclick="tog('fResp')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cs">
+      <div class="cs-hdr">🏪 Setores</div>
+      <div id="sList"></div>
+      <button class="badd" onclick="tog('fSet')">+ Adicionar setor</button>
+      <div class="fadd" id="fSet">
+        <div><label>Nome do setor</label><input type="text" id="nSet" placeholder="Ex: AÇOUGUE"></div>
+        <div class="fr">
+          <button class="bsave2" onclick="addSet()">✅ Salvar</button>
+          <button class="bcan" onclick="tog('fSet')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cs">
+      <div class="cs-hdr">🛍️ Produtos <span id="pCnt"></span></div>
+      <div class="sw" style="margin-bottom:10px"><span class="si">🔍</span><input type="text" id="cfgSrc" placeholder="Buscar produto..." oninput="renderCfg()"></div>
+      <div id="cfgPList"></div>
+      <button class="badd" onclick="tog('fProd')">+ Adicionar produto</button>
+      <div class="fadd" id="fProd">
+        <div class="fadd-foto" id="fprev" onclick="document.getElementById('fImg').click()">
+          📷<input type="file" id="fImg" accept="image/*" onchange="prevFoto(this)">
+        </div>
+        <div><label>Nome do produto *</label><input type="text" id="nPNm" placeholder="Ex: BOLO DE CHURROS"></div>
+        <div class="fg"><label>Código</label><input type="text" id="nPCd" placeholder="Ex: 1234"></div>
+        <div class="fg"><label>Setor *</label><select id="nPSt"></select></div>
+        <div class="fr">
+          <button class="bsave2" onclick="addProd()">✅ Salvar</button>
+          <button class="bcan" onclick="tog('fProd');clrFoto()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="bar">
+  <div class="bt">
+    <strong id="bCnt">0 produtos</strong>
+    <span id="bSub">Nenhum registrado</span>
+  </div>
+  <button class="bvw" onclick="openMod()">Ver tudo</button>
+  <button class="bsv" id="bSave" onclick="salvar()" disabled>💾 Salvar</button>
+</div>
+
+<div class="tst" id="tst"></div>
+
+<div class="ov" id="ov" onclick="closeMod(event)">
+  <div class="mo">
+    <div class="mh"></div>
+    <div class="mt" id="mTit">Desperdícios</div>
+    <div id="mCont"></div>
+    <div class="mbtns">
+      <button class="mbtn gd" onclick="expCSV()">⬇️ Exportar CSV</button>
+      <button class="mbtn gy" onclick="closeMod()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// ⚙️ CONFIGURAÇÃO SUPABASE — EDITE AQUI
+// Siga o GUIA_SUPABASE.html para obter esses valores
+// ═══════════════════════════════════════════════════
+const SUPA_URL = 'https://rjkseydseuotdkavskss.supabase.co';   // ex: https://abcxyz.supabase.co
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqa3NleWRzZXVvdGRrYXZza3NzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTE4OTAsImV4cCI6MjA4Nzc4Nzg5MH0.wEzZ9sZhXJhu0jjNx2OeW7RacGi8djUj-9r9u1-8KYY'; // ex: eyJhbGciOiJIUzI1NiIs...
+// ═══════════════════════════════════════════════════
+
+const SUPA_OK = true;
+const K = 'mg_desp3';
+
+// ── Supabase REST helpers ──
+async function sbSelect(table, filters=''){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?${filters}`,{
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json'}
+  });
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbInsert(table, rows){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(Array.isArray(rows)?rows:[rows])
+  });
+  if(!r.ok) throw new Error(await r.text());
+}
+async function sbDelete(table, id){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?id=eq.${id}`,{
+    method:'DELETE',
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+  });
+  if(!r.ok) throw new Error(await r.text());
+}
+async function sbUpsert(table, row){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(row)
+  });
+  if(!r.ok) throw new Error(await r.text());
+}
+async function cGet(){ return JSON.parse(localStorage.getItem(K)||'null'); }
+async function cSet(v){ localStorage.setItem(K,JSON.stringify(v)); }
+
+// ═══════════════════════════════════
+// BANCO DE DADOS — 143 PRODUTOS
+// ═══════════════════════════════════
+const BASE=[
+  // PADARIA
+  {c:'6953',n:'PÃO 12 GRÃOS LIGHT KG',s:'PADARIA'},
+  {c:'5366',n:'PÃO DA FAZENDA KG',s:'PADARIA'},
+  {c:'3657',n:'PÃO DE CAIXA INTEGRAL LIGHT',s:'PADARIA'},
+  {c:'1710',n:'PÃO DE BATATA KG',s:'PADARIA'},
+  {c:'1034',n:'PÃO ITALIANO',s:'PADARIA'},
+  {c:'6952',n:'PÃO CENTEIO LIGHT KG',s:'PADARIA'},
+  {c:'6636',n:'BISCOITO AMANTEIGADO KG',s:'PADARIA'},
+  {c:'4299',n:'BISCOITO POLVILHO KG',s:'PADARIA'},
+  {c:'7460',n:'BOLACHA 7 CAPAS KG',s:'PADARIA'},
+  {c:'4355',n:'BOLACHA DE ALHO',s:'PADARIA'},
+  {c:'4346',n:'BOLACHA DE CEBOLA',s:'PADARIA'},
+  {c:'526',n:'BOLACHA DE COCO',s:'PADARIA'},
+  {c:'9652',n:'BOLACHA INTEGRAL DA CASA KG',s:'PADARIA'},
+  {c:'5656',n:'BOLACHA MARAGOGI KG',s:'PADARIA'},
+  {c:'5264',n:'BOLACHA PORTUGUESA KG',s:'PADARIA'},
+  {c:'1545',n:'BOLACHA PRAEIRA DA CASA KG',s:'PADARIA'},
+  {c:'1546',n:'BOLACHA SODA DA CASA KG',s:'PADARIA'},
+  {c:'858',n:'BOLACHA SUIÇA DA CASA KG',s:'PADARIA'},
+  {c:'7949',n:'COOKIES CHOCOLATE / LARANJA',s:'PADARIA'},
+  {c:'5246',n:'CROASSAINT',s:'PADARIA'},
+  {c:'3536',n:'CROISSANTE SANDUICHE',s:'PADARIA'},
+  {c:'1556',n:'PANETONE DA CASA KG',s:'PADARIA'},
+  {c:'4242',n:'PANETONE DE CHOCOLATE KG',s:'PADARIA'},
+  {c:'6713',n:'PÃO AÇAI C/GUARANA',s:'PADARIA'},
+  {c:'4206',n:'PÃO AUSTRALIANO KG',s:'PADARIA'},
+  {c:'4576',n:'PÃO BOLACHÃO KG',s:'PADARIA'},
+  {c:'5529',n:'PÃO BRIOCHE KG',s:'PADARIA'},
+  {c:'1543',n:'PÃO CACHORRO QUENTE KG',s:'PADARIA'},
+  {c:'5829',n:'PÃO DE ALHO KG',s:'PADARIA'},
+  {c:'6955',n:'PÃO DE CAIXA CENTEIO LIGHT KG',s:'PADARIA'},
+  {c:'1542',n:'PÃO DE CAIXA KG',s:'PADARIA'},
+  {c:'6954',n:'PÃO DE CAIXA MULTIGRÃOS KG',s:'PADARIA'},
+  {c:'8662',n:'PÃO DE CHIA KG',s:'PADARIA'},
+  {c:'1544',n:'PÃO DE HAMBURGUER KG',s:'PADARIA'},
+  {c:'714',n:'PÃO DOCE KG',s:'PADARIA'},
+  {c:'715',n:'PÃO FRANCES INTEGRAL KG',s:'PADARIA'},
+  {c:'708',n:'PÃO FRANCES KG',s:'PADARIA'},
+  {c:'9542',n:'PÃO MINI DOG KG',s:'PADARIA'},
+  {c:'4098',n:'PÃO PIZZA FATIA',s:'PADARIA'},
+  {c:'2540',n:'PÃO QUINOA',s:'PADARIA'},
+  {c:'9666',n:'PÃO RECIFE KG',s:'PADARIA'},
+  {c:'6276',n:'ROSQUINHAS',s:'PADARIA'},
+  {c:'9636',n:'TARECO',s:'PADARIA'},
+  {c:'1557',n:'TORRADA DA CASA KG',s:'PADARIA'},
+  {c:'1566',n:'TORRADA DE ALHO',s:'PADARIA'},
+  // CONFEITARIA
+  {c:'5362',n:'BOLO DE BANANA',s:'CONFEITARIA'},
+  {c:'5221',n:'BOLO DE PAMONHA',s:'CONFEITARIA'},
+  {c:'5421',n:'BRIGADEIRÃO',s:'CONFEITARIA'},
+  {c:'5368',n:'BOLO DE AMEIXA',s:'CONFEITARIA'},
+  {c:'2657',n:'BOLO DE MACAXEIRA',s:'CONFEITARIA'},
+  {c:'9599',n:'BOLO DE MILHO',s:'CONFEITARIA'},
+  {c:'',n:'BOLO DE NOIVA',s:'CONFEITARIA'},
+  {c:'5364',n:'BOLO DE COCADA',s:'CONFEITARIA'},
+  {c:'1574',n:'DONUTS',s:'CONFEITARIA'},
+  {c:'9526',n:'BOLO MESCLADO',s:'CONFEITARIA'},
+  {c:'9525',n:'BOLO DE TRIGO',s:'CONFEITARIA'},
+  {c:'2658',n:'BOLO DE MANDIOCA',s:'CONFEITARIA'},
+  {c:'3634',n:'BOLO SURPRESA DE AMEIXA',s:'CONFEITARIA'},
+  {c:'5697',n:'BOLO ENGORDA MARIDO',s:'CONFEITARIA'},
+  {c:'5363',n:'BOLO DE ABACAXI',s:'CONFEITARIA'},
+  {c:'5452',n:'PUDIM',s:'CONFEITARIA'},
+  {c:'5458',n:'TORTA DOCE DE LEITE KG',s:'CONFEITARIA'},
+  {c:'3592',n:'BANOFFE UND',s:'CONFEITARIA'},
+  {c:'6655',n:'BISCOITO CHAMPANHE',s:'CONFEITARIA'},
+  {c:'1756',n:'BOLO BACIA',s:'CONFEITARIA'},
+  {c:'1666',n:'BOLO BEM BOCADO MACAXEIRA',s:'CONFEITARIA'},
+  {c:'9527',n:'BOLO DE AIMPIM',s:'CONFEITARIA'},
+  {c:'9648',n:'BOLO DE BANANA COM CANELA',s:'CONFEITARIA'},
+  {c:'5367',n:'BOLO DE CANJICA',s:'CONFEITARIA'},
+  {c:'5360',n:'BOLO DE CENOURA',s:'CONFEITARIA'},
+  {c:'2147',n:'BOLO DE CHURROS',s:'CONFEITARIA'},
+  {c:'9296',n:'BOLO DE COCO',s:'CONFEITARIA'},
+  {c:'9643',n:'BOLO DE FRUTAS VERMELHAS',s:'CONFEITARIA'},
+  {c:'9531',n:'BOLO DE LARANJA',s:'CONFEITARIA'},
+  {c:'4273',n:'BOLO DE LEITE CONDENSADO',s:'CONFEITARIA'},
+  {c:'4529',n:'BOLO DE LIMÃO',s:'CONFEITARIA'},
+  {c:'6696',n:'BOLO DE MAÇÃ',s:'CONFEITARIA'},
+  {c:'6612',n:'BOLO DE MAÇÃ COM CANELA',s:'CONFEITARIA'},
+  {c:'9534',n:'BOLO DE MARACUJA',s:'CONFEITARIA'},
+  {c:'6746',n:'BOLO DE MILHO CREMOSO',s:'CONFEITARIA'},
+  {c:'5986',n:'BOLO DE MILHO VERDE',s:'CONFEITARIA'},
+  {c:'6164',n:'BOLO DE NAPOLITANO',s:'CONFEITARIA'},
+  {c:'6676',n:'BOLO DE PAÇOCA',s:'CONFEITARIA'},
+  {c:'2652',n:'BOLO DE PÉ DE MOLEQUE',s:'CONFEITARIA'},
+  {c:'5518',n:'BOLO DE POTE DE CHOCOLATE',s:'CONFEITARIA'},
+  {c:'5029',n:'BOLO DE PRESTIGIO',s:'CONFEITARIA'},
+  {c:'6413',n:'BOLO DE QUEIJO',s:'CONFEITARIA'},
+  {c:'6988',n:'BOLO DE TAPIOCA COM LEITE CONDENSADO',s:'CONFEITARIA'},
+  {c:'5640',n:'BOLO DE TAPIOCA',s:'CONFEITARIA'},
+  {c:'9521',n:'BOLO FORMIGUEIRO',s:'CONFEITARIA'},
+  {c:'6764',n:'BOLO GIENECCHINE',s:'CONFEITARIA'},
+  {c:'6394',n:'BOLO INGLÊS',s:'CONFEITARIA'},
+  {c:'2457',n:'BOLO PUDIM KG',s:'CONFEITARIA'},
+  {c:'6761',n:'BOLO PUDIM UND',s:'CONFEITARIA'},
+  {c:'4477',n:'BOLO SOUZA LEÃO',s:'CONFEITARIA'},
+  {c:'6371',n:'BOLO SURPRESA AMENDOIM',s:'CONFEITARIA'},
+  {c:'6723',n:'BOLO SURPRESA CASTANHA',s:'CONFEITARIA'},
+  {c:'6544',n:'BOLO SURPRESA DE COCO',s:'CONFEITARIA'},
+  {c:'6449',n:'BOLO SURPRESA NATA GOIABA',s:'CONFEITARIA'},
+  {c:'1593',n:'BOLO XADREZ',s:'CONFEITARIA'},
+  {c:'1547',n:'BROA',s:'CONFEITARIA'},
+  {c:'6792',n:'COCADA',s:'CONFEITARIA'},
+  {c:'4599',n:'DELICIA DE ABACAXI UND',s:'CONFEITARIA'},
+  {c:'6762',n:'DOCE DE BANANA',s:'CONFEITARIA'},
+  {c:'6026',n:'MINI BROA',s:'CONFEITARIA'},
+  {c:'5455',n:'MOUSSES',s:'CONFEITARIA'},
+  {c:'6040',n:'PALHA ITALIANA',s:'CONFEITARIA'},
+  {c:'5865',n:'PALMIER',s:'CONFEITARIA'},
+  {c:'5065',n:'PÃO DE MEL',s:'CONFEITARIA'},
+  {c:'7626',n:'QUEIJADINHA',s:'CONFEITARIA'},
+  {c:'1595',n:'TORTA CHOCOLATE KG',s:'CONFEITARIA'},
+  {c:'5459',n:'TORTA LIMÃO KG',s:'CONFEITARIA'},
+  {c:'6765',n:'TORTA MARACUJA KG',s:'CONFEITARIA'},
+  {c:'6861',n:'TORTA MORANGO KG',s:'CONFEITARIA'},
+  {c:'5982',n:'TORTAS ESPECIAL KG',s:'CONFEITARIA'},
+  // LANCHONETE
+  {c:'9452',n:'MINI COXINHA DE FRANGO',s:'LANCHONETE'},
+  {c:'5051',n:'FOLHADOS',s:'LANCHONETE'},
+  {c:'',n:'BOLINHO DE BACALHAU',s:'LANCHONETE'},
+  {c:'9774',n:'CAMARÃO EMPANADO',s:'LANCHONETE'},
+  {c:'4773',n:'MINI CHURROS',s:'LANCHONETE'},
+  {c:'6759',n:'BOLINHO DE QUEIJO',s:'LANCHONETE'},
+  {c:'5331',n:'MINI COXINHA DE FRANGO COM REQUEIJÃO',s:'LANCHONETE'},
+  {c:'6582',n:'MINI COXINHA DE CHARQUE',s:'LANCHONETE'},
+  {c:'6849',n:'BOLINHO DE QUEIJO COM CALABRESA',s:'LANCHONETE'},
+  {c:'6540',n:'CANJICA',s:'LANCHONETE'},
+  {c:'9453',n:'COXINHA',s:'LANCHONETE'},
+  {c:'5705',n:'EMPADA UND',s:'LANCHONETE'},
+  {c:'9455',n:'ENROLADINHO',s:'LANCHONETE'},
+  {c:'4203',n:'MINI CROASSANT KG',s:'LANCHONETE'},
+  {c:'4370',n:'MINI CROISSANT DOCE KG',s:'LANCHONETE'},
+  {c:'9681',n:'MINI EMPADA KG',s:'LANCHONETE'},
+  {c:'7561',n:'MINI FRANCES KG',s:'LANCHONETE'},
+  {c:'715',n:'MINI INTEGRAL DA CASA KG',s:'LANCHONETE'},
+  {c:'7846',n:'MINI PIZZA UNIDADE',s:'LANCHONETE'},
+  {c:'4451',n:'PÃO DE QUEIJO KG',s:'LANCHONETE'},
+  {c:'5129',n:'PASTEL DE CARNE',s:'LANCHONETE'},
+  {c:'9439',n:'QUICHE DE ALHO PORO',s:'LANCHONETE'},
+  {c:'6330',n:'SALGADO DE BATATA COM FRANGO UND',s:'LANCHONETE'},
+  {c:'633',n:'SALGADO DE BATATA CALABRESA',s:'LANCHONETE'},
+  {c:'6631',n:'SALGADO DE BATATA MISTO UND',s:'LANCHONETE'},
+  {c:'6331',n:'SALGADO DE BATATA MISTO',s:'LANCHONETE'},
+  {c:'7485',n:'SONHO DA CASA KG',s:'LANCHONETE'},
+  {c:'6957',n:'TORTA SALGADA KG',s:'LANCHONETE'},
+];
+
+const DIAS=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const ICO={PADARIA:'🍞',CONFEITARIA:'🎂',LANCHONETE:'🥟'};
+const COR={PADARIA:'var(--blue)',CONFEITARIA:'var(--red2)',LANCHONETE:'var(--green)'};
+
+const pk=p=>`${p.s}|${p.c}|${p.n}`;
+let Q={}, SF='TODOS', nFoto='';
+
+// Estado da app
+let D={hist:[],extra:[],resps:['JOÃO','MARIA','PEDRO','ANA'],sets:['PADARIA','CONFEITARIA','LANCHONETE'],fotos:{}};
+function allProds(){return[...BASE,...D.extra];}
+
+// ═══ INIT ═══
+(async()=>{
+  const t=new Date(),y=t.getFullYear(),m=String(t.getMonth()+1).padStart(2,'0'),d=String(t.getDate()).padStart(2,'0');
+  document.getElementById('iData').value=`${y}-${m}-${d}`;
+  await load();
+  syncHdr(); renderAll();
+})();
+
+async function load(){
+  setSyncUI('wait');
+  try{
+    if(SUPA_OK){
+      const [regs, extras, resps] = await Promise.all([
+        sbSelect('desperdicios','limit=2000'),
+        sbSelect('produtos_extra','tipo=eq.desperdicios&limit=500'),
+        sbSelect('responsaveis','limit=100')
+      ]);
+      const map={};
+      (regs||[]).forEach(r=>{
+        const k=`${r.data}|${r.motivo}|${r.responsavel}`;
+        if(!map[k]) map[k]={id:k,data:r.data,dia:r.dia_semana,resp:r.responsavel,motivo:r.motivo,regs:[]};
+        map[k].regs.push({id:r.id,prod:r.produto,cod:r.cod,set:r.setor,qty:r.quantidade,mot:r.motivo,resp:r.responsavel,data:r.data,dia:r.dia_semana});
+      });
+      D.hist=Object.values(map).sort((a,b)=>b.data.localeCompare(a.data));
+      D.extra=(extras||[]).map(e=>({c:e.cod||'',n:e.nome,s:e.setor||'PADARIA',_id:e.id}));
+      if(resps&&resps.length) D.resps=resps.map(r=>r.nome);
+      const lc=JSON.parse(localStorage.getItem(K)||'{}');
+      D.fotos=lc.fotos||{}; D.sets=lc.sets||D.sets;
+      setSyncUI('ok');
+    } else {
+      const sv=await cGet();
+      if(sv){D.hist=sv.hist||[];D.extra=sv.extra||[];D.resps=sv.resps||D.resps;D.sets=sv.sets||D.sets;D.fotos=sv.fotos||{};}
+      setSyncUI('local');
+    }
+  }catch(e){
+    const sv=await cGet();
+    if(sv){D.hist=sv.hist||[];D.extra=sv.extra||[];D.resps=sv.resps||D.resps;D.sets=sv.sets||D.sets;D.fotos=sv.fotos||{};}
+    setSyncUI('off');
+  }
+}
+
+async function saveLocal(){
+  localStorage.setItem(K,JSON.stringify({fotos:D.fotos,sets:D.sets}));
+}
+
+function setSyncUI(st){
+  const dot=document.getElementById('syncDot'),txt=document.getElementById('syncTxt'),cfg=document.getElementById('cfgSync');
+  if(st==='ok'){dot.className='dot';dot.style.background='#4CAF50';txt.textContent='Supabase ativo';if(cfg)cfg.textContent='✅ Supabase conectado — dados compartilhados em tempo real';}
+  else if(st==='local'){dot.className='dot';dot.style.background='#FF9800';txt.textContent='Local';if(cfg)cfg.textContent='⚠️ Configure o Supabase no GUIA_SUPABASE.html para sincronizar';}
+  else if(st==='wait'){dot.className='dot wait';dot.style.background='var(--gold)';txt.textContent='Sincronizando...';}
+  else{dot.className='dot off';txt.textContent='Erro conexão';if(cfg)cfg.textContent='❌ Erro ao conectar — verifique URL e chave no Passo 4 do guia';}
+}
+
+async function forceSync(){await load();renderAll();toast('🔄 Sincronizado!','ok');}
+
+function renderAll(){
+  renderResps(); renderSets(); renderCfg(); renderSpills(); renderResp(); render();
+}
+
+// ═══ TABS ═══
+function go(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['reg','hist','res','cfg'][i]===t));
+  document.querySelectorAll('.vw').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-'+t).classList.add('on');
+  if(t==='hist') renderHist();
+  if(t==='res')  renderRes();
+}
+
+function syncHdr(){
+  const v=document.getElementById('iData').value;
+  if(!v)return;
+  const dt=new Date(v+'T12:00:00');
+  document.getElementById('hDate').textContent=dt.toLocaleDateString('pt-BR')+' — '+DIAS[dt.getDay()];
+}
+
+// ═══ SPILLS ═══
+function renderSpills(){
+  const all=['TODOS',...D.sets];
+  document.getElementById('spills').innerHTML=all.map(s=>
+    `<div class="sp ${s===SF?'on':''}" data-s="${s}" onclick="setS('${s}')">${s==='TODOS'?'🏪 Todos':s}</div>`
+  ).join('');
+}
+function setS(s){SF=s;renderSpills();render();}
+
+// ═══ RENDER PRODUTOS ═══
+function render(){
+  const q=document.getElementById('iSrc').value.toLowerCase().trim();
+  let list=allProds();
+  if(SF!=='TODOS') list=list.filter(p=>p.s===SF);
+  if(q) list=list.filter(p=>p.n.toLowerCase().includes(q)||p.c.includes(q));
+
+  document.getElementById('lLbl').textContent=SF==='TODOS'?'Todos os produtos':SF;
+  document.getElementById('lCnt').textContent=list.length+' produto'+(list.length!==1?'s':'');
+
+  if(!list.length){
+    document.getElementById('pList').innerHTML=`<div class="emp"><div class="big">🔍</div><p>Produto não encontrado.<br>Verifique a ortografia ou busque por código.</p></div>`;
+    return;
+  }
+
+  document.getElementById('pList').innerHTML=list.map(p=>{
+    const k=pk(p),v=Q[k]||'',fl=v>0,sid=k.replace(/[^a-z0-9]/gi,'_');
+    const foto=D.fotos[k]||'';
+    return `<div class="pc ${fl?'filled':''}" data-s="${p.s}" id="c${sid}">
+      <div class="pfoto" style="border-color:${fl?(COR[p.s]||'var(--red2)'):'var(--gold-l)'}">
+        ${foto?`<img src="${foto}" alt="">`:`<span>${ICO[p.s]||'📦'}</span>`}
+      </div>
+      <div class="pi">
+        <div class="pn">${p.n}</div>
+        <div class="pm">COD: ${p.c||'—'}</div>
+        <span class="stag ${p.s}">${p.s}</span>
+        <div class="pq">
+          <button class="qb" onclick="adj('${k}',-1,event)">−</button>
+          <input class="qi ${v?'v':''}" type="number" min="0" step="0.1"
+            value="${v}" placeholder="0" id="q${sid}"
+            oninput="chg('${k}',this)" onfocus="this.select()">
+          <button class="qb" onclick="adj('${k}',1,event)">+</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  upBar();
+}
+
+function chg(k,el){
+  const v=parseFloat(el.value);
+  if(!isNaN(v)&&v>0){Q[k]=v;el.classList.add('v');}
+  else{delete Q[k];el.classList.remove('v');}
+  const sid=k.replace(/[^a-z0-9]/gi,'_');
+  const card=document.getElementById('c'+sid);
+  if(card){
+    card.classList.toggle('filled',!!Q[k]);
+    const foto=card.querySelector('.pfoto');
+    const p=allProds().find(x=>pk(x)===k);
+    if(foto&&p) foto.style.borderColor=Q[k]?(COR[p.s]||'var(--red2)'):'var(--gold-l)';
+  }
+  upBar();
+}
+
+function adj(k,d,e){
+  e.stopPropagation();
+  const sid=k.replace(/[^a-z0-9]/gi,'_');
+  const el=document.getElementById('q'+sid);
+  const cur=parseFloat(el.value)||0;
+  const nv=Math.max(0,parseFloat((cur+d*0.5).toFixed(1)));
+  el.value=nv>0?nv:''; chg(k,el);
+}
+
+function upBar(){
+  const n=Object.keys(Q).length;
+  document.getElementById('hBadge').textContent=n+' ite'+(n===1?'m':'ns');
+  document.getElementById('bCnt').textContent=n+' produto'+(n!==1?'s':'');
+  document.getElementById('bSub').textContent=n===0?'Nenhum registrado':'Prontos para salvar';
+  document.getElementById('bSave').disabled=n===0;
+}
+
+// ═══ SALVAR ═══
+async function salvar(){
+  const data=document.getElementById('iData').value;
+  const resp=document.getElementById('iResp').value;
+  const mot=document.getElementById('iMot').value;
+  if(!data){toast('⚠️ Selecione a data!','er');return;}
+  const n=Object.keys(Q).length;
+  if(!n){toast('⚠️ Nenhuma quantidade!','er');return;}
+
+  const dt=new Date(data+'T12:00:00');
+  const dfmt=dt.toLocaleDateString('pt-BR');
+  const dia=DIAS[dt.getDay()];
+  const regs=Object.entries(Q).map(([k,v])=>{
+    const p=allProds().find(x=>pk(x)===k)||{n:k,c:'',s:'?'};
+    return{id:crypto.randomUUID?crypto.randomUUID():(Date.now()+'_'+Math.random().toString(36).slice(2,7)),prod:p.n,cod:p.c,set:p.s,qty:v,mot,resp,data:dfmt,dia};
+  });
+
+  setSyncUI('wait');
+  try{
+    if(SUPA_OK){
+      const rows=regs.map(r=>({id:r.id,data:r.data,dia_semana:r.dia,produto:r.prod,cod:r.cod,setor:r.set,quantidade:r.qty,motivo:r.mot,responsavel:r.resp}));
+      await sbInsert('desperdicios',rows);
+    } else {
+      await saveLocal();
+    }
+    const idx=D.hist.findIndex(h=>h.data===dfmt&&h.mot===mot&&h.resp===resp);
+    if(idx>=0) D.hist[idx].regs=[...D.hist[idx].regs,...regs];
+    else D.hist.unshift({id:dfmt+'|'+mot+'|'+resp,data:dfmt,dia,resp,mot,regs});
+    setSyncUI(SUPA_OK?'ok':'local');
+    toast(`✅ ${n} ite${n===1?'m':'ns'} salvos!`,'ok');
+    Q={}; render();
+  }catch(e){ setSyncUI('off'); toast('❌ Erro ao salvar: '+e.message.slice(0,40),'er'); }
+}
+
+// ═══ MODAL ═══
+function openMod(){
+  const n=Object.keys(Q).length;
+  if(!n){toast('Nenhum item registrado');return;}
+  const v=document.getElementById('iData').value;
+  const dt=new Date(v+'T12:00:00');
+  document.getElementById('mTit').textContent=`🗑️ ${dt.toLocaleDateString('pt-BR')} — ${document.getElementById('iResp').value}`;
+  document.getElementById('mCont').innerHTML=Object.entries(Q).map(([k,v])=>{
+    const p=allProds().find(x=>pk(x)===k)||{n:k,c:'',s:'?'};
+    return`<div class="mi">
+      <div class="mi-info">
+        <div class="mi-nm">${p.n}</div>
+        <div class="mi-mt">COD: ${p.c||'—'} · <span class="stag ${p.s}" style="font-size:.58rem">${p.s}</span></div>
+      </div>
+      <span class="mi-qty">${v}</span>
+      <button class="md" onclick="remQ('${k}')">🗑</button>
+    </div>`;
+  }).join('');
+  document.getElementById('ov').classList.add('on');
+}
+function remQ(k){delete Q[k];upBar();openMod();render();}
+function closeMod(e){if(!e||e.target===document.getElementById('ov'))document.getElementById('ov').classList.remove('on');}
+
+function expCSV(){
+  const v=document.getElementById('iData').value,resp=document.getElementById('iResp').value,mot=document.getElementById('iMot').value;
+  const dt=new Date(v+'T12:00:00');
+  let csv='PRODUTO;COD;SETOR;QUANTIDADE;MOTIVO;DATA;DIA SEMANA;RESPONSAVEL\n';
+  Object.entries(Q).forEach(([k,qty])=>{
+    const p=allProds().find(x=>pk(x)===k)||{n:k,c:'',s:'?'};
+    csv+=`${p.n};${p.c};${p.s};${qty};${mot};${dt.toLocaleDateString('pt-BR')};${DIAS[dt.getDay()]};${resp}\n`;
+  });
+  dl(csv,`desperdicios_${v}.csv`); toast('📥 CSV exportado!','ok');
+}
+
+// ═══ HISTÓRICO ═══
+function renderHist(){
+  const el=document.getElementById('histC');
+  if(!D.hist.length){
+    el.innerHTML=`<div class="emp"><div class="big">📋</div><p>Nenhum registro salvo ainda.</p></div>`;return;
+  }
+  el.innerHTML=
+    `<button class="hexp" onclick="expTudo()">⬇️ Exportar TODO o histórico CSV</button>`+
+    D.hist.map(h=>`<div class="hday" id="hd${h.id}">
+      <div class="hdtop">
+        <div class="hdinfo">
+          <strong>📅 ${h.data} — ${h.dia}</strong>
+          <span>${h.regs.length} ite${h.regs.length!==1?'ns':'m'} · ${h.mot} · ${h.resp}</span>
+        </div>
+        <button class="hddel" onclick="delDia('${h.id}')">🗑 Apagar dia</button>
+      </div>
+      ${h.regs.map(r=>`<div class="hreg" id="hr${r.id}">
+        <div class="hreg-l">
+          <span class="stag ${r.set}" style="font-size:.58rem;margin-bottom:2px;display:block;width:fit-content">${r.set}</span>
+          <div class="hreg-nm">${r.prod}</div>
+        </div>
+        <div class="hreg-r">
+          <span class="hreg-qty">${r.qty}</span>
+          <button class="hreg-del" onclick="delReg('${h.id}','${r.id}')" title="Excluir apenas este item">🗑</button>
+        </div>
+      </div>`).join('')}
+    </div>`).join('')+
+    `<button class="hclr" onclick="limpar()">🗑️ Limpar TODO o histórico</button>`;
+}
+
+async function delDia(id){
+  if(!confirm('Apagar todos os registros deste dia?'))return;
+  const h=D.hist.find(x=>x.id===id); if(!h)return;
+  setSyncUI('wait');
+  try{
+    if(SUPA_OK) await Promise.all(h.regs.map(r=>sbDelete('desperdicios',r.id)));
+    D.hist=D.hist.filter(x=>x.id!==id);
+    await saveLocal(); setSyncUI(SUPA_OK?'ok':'local'); renderHist(); toast('Dia apagado','er');
+  }catch(e){ setSyncUI('off'); toast('Erro ao apagar','er'); }
+}
+
+async function delReg(hid,rid){
+  const h=D.hist.find(x=>x.id===hid);
+  if(!h)return;
+  h.regs=h.regs.filter(r=>r.id!==rid);
+  if(!h.regs.length) D.hist=D.hist.filter(x=>x.id!==hid);
+  await saveLocal(); setSyncUI(SUPA_OK?'ok':'local'); renderHist(); toast('Item removido','er');
+}
+
+async function limpar(){
+  if(!confirm('Apagar TODO o histórico? Não tem como desfazer!'))return;
+  D.hist=[]; await saveLocal(); setSyncUI(SUPA_OK?'ok':'local'); renderHist(); toast('Histórico apagado','er');
+}
+
+function expTudo(){
+  let csv='PRODUTO;COD;SETOR;QUANTIDADE;MOTIVO;DATA;DIA SEMANA;RESPONSAVEL\n';
+  D.hist.forEach(h=>h.regs.forEach(r=>{
+    csv+=`${r.prod};${r.cod};${r.set};${r.qty};${r.mot};${r.data};${r.dia};${r.resp}\n`;
+  }));
+  dl(csv,'historico_desperdicios.csv'); toast('📥 Exportado!','ok');
+}
+
+// ═══ RESUMO ═══
+function renderRes(){
+  const el=document.getElementById('resC');
+  if(!D.hist.length){el.innerHTML=`<div class="emp"><div class="big">📊</div><p>Sem dados.</p></div>`;return;}
+  let tot=0,pS={},pP={};
+  D.hist.forEach(h=>h.regs.forEach(r=>{
+    tot+=r.qty; pS[r.set]=(pS[r.set]||0)+r.qty;
+    if(!pP[r.prod]) pP[r.prod]={qty:0,set:r.set};
+    pP[r.prod].qty+=r.qty;
+  }));
+  const top=Object.entries(pP).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
+  el.innerHTML=`
+  <div class="rb"><h3>📊 Total por setor</h3>
+    <div class="rr" style="font-weight:700"><span class="rn">🏪 TOTAL GERAL</span><span class="rv" style="color:var(--brown)">${tot.toFixed(3)}</span></div>
+    ${D.sets.map(s=>`<div class="rr ${s}"><span class="rn">${ICO[s]||'📦'} ${s}</span><span class="rv">${(pS[s]||0).toFixed(3)}</span></div>`).join('')}
+  </div>
+  <div class="rb"><h3>🔴 Top 5 mais desperdiçados</h3>
+    ${top.map(([n,d],i)=>`<div class="rr ${d.set}"><span class="rn">${i+1}. ${n}</span><span class="rv">${d.qty.toFixed(3)}</span></div>`).join('')}
+  </div>
+  <div class="rb"><h3>📅 Estatísticas</h3>
+    <div class="rr"><span class="rn">Dias registrados</span><span class="rv" style="color:var(--brown)">${D.hist.length}</span></div>
+    <div class="rr"><span class="rn">Total de itens</span><span class="rv" style="color:var(--brown)">${D.hist.reduce((a,h)=>a+h.regs.length,0)}</span></div>
+    <div class="rr"><span class="rn">Produtos no sistema</span><span class="rv" style="color:var(--brown)">${allProds().length}</span></div>
+  </div>`;
+}
+
+// ═══ CONFIG — RESPONSÁVEIS ═══
+function renderResp(){
+  const sel=document.getElementById('iResp');
+  const cur=sel.value;
+  sel.innerHTML=D.resps.map(r=>`<option ${r===cur?'selected':''}>${r}</option>`).join('');
+}
+function renderResps(){
+  document.getElementById('rCnt').textContent=D.resps.length+' cadastrados';
+  document.getElementById('rList').innerHTML=D.resps.map(r=>`
+    <div class="ci">
+      <span style="font-size:1.3rem">👤</span>
+      <div class="ci-info"><div class="ci-nm">${r}</div></div>
+      <button class="ci-del" onclick="delResp('${r}')">🗑</button>
+    </div>`).join('');
+  renderResp();
+}
+async function addResp(){
+  const v=document.getElementById('nResp').value.trim().toUpperCase();
+  if(!v){toast('⚠️ Digite o nome','er');return;}
+  if(D.resps.includes(v)){toast('Já cadastrado','er');return;}
+  try{
+    if(SUPA_OK) await sbUpsert('responsaveis',{nome:v});
+    D.resps.push(v); document.getElementById('nResp').value='';
+    tog('fResp'); await saveLocal(); renderResps(); toast(`✅ ${v} adicionado`,'ok');
+  }catch(e){ toast('Erro ao salvar','er'); }
+}
+async function delResp(r){
+  if(D.resps.length<=1){toast('Mínimo 1 responsável','er');return;}
+  if(!confirm(`Remover ${r}?`))return;
+  try{
+    if(SUPA_OK) await fetch(`${SUPA_URL}/rest/v1/responsaveis?nome=eq.${encodeURIComponent(r)}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}});
+    D.resps=D.resps.filter(x=>x!==r); await saveLocal(); renderResps(); toast(`${r} removido`,'er');
+  }catch(e){ toast('Erro ao remover','er'); }
+}
+
+// ═══ CONFIG — SETORES ═══
+function renderSets(){
+  document.getElementById('sList').innerHTML=D.sets.map(s=>`
+    <div class="ci">
+      <span style="font-size:1.3rem">${ICO[s]||'📦'}</span>
+      <div class="ci-info"><div class="ci-nm">${s}</div></div>
+      ${!['PADARIA','CONFEITARIA','LANCHONETE'].includes(s)?`<button class="ci-del" onclick="delSet('${s}')">🗑</button>`:`<span style="font-size:.6rem;color:var(--gray)">padrão</span>`}
+    </div>`).join('');
+  const sel=document.getElementById('nPSt');
+  if(sel) sel.innerHTML=D.sets.map(s=>`<option>${s}</option>`).join('');
+}
+async function addSet(){
+  const v=document.getElementById('nSet').value.trim().toUpperCase();
+  if(!v){toast('⚠️ Digite o nome','er');return;}
+  if(D.sets.includes(v)){toast('Já existe','er');return;}
+  D.sets.push(v); document.getElementById('nSet').value='';
+  tog('fSet'); await saveLocal(); renderSets(); renderSpills(); toast(`✅ ${v} adicionado`,'ok');
+}
+async function delSet(s){
+  if(!confirm(`Remover setor ${s}?`))return;
+  D.sets=D.sets.filter(x=>x!==s); await saveLocal(); renderSets(); renderSpills(); toast(`${s} removido`,'er');
+}
+
+// ═══ CONFIG — PRODUTOS ═══
+function renderCfg(){
+  const q=(document.getElementById('cfgSrc')||{value:''}).value.toLowerCase();
+  const list=allProds().filter(p=>!q||p.n.toLowerCase().includes(q)||p.c.includes(q));
+  document.getElementById('pCnt').textContent=allProds().length+' cadastrados';
+  document.getElementById('cfgPList').innerHTML=list.map(p=>{
+    const k=pk(p),foto=D.fotos[k]||'';
+    const isBase=BASE.find(b=>b.c===p.c&&b.n===p.n);
+    const sid=k.replace(/[^a-z0-9]/gi,'_');
+    return`<div class="ci">
+      <div class="ci-foto" onclick="${!isBase?`document.getElementById('fi${sid}').click()`:''}" style="${!isBase?'cursor:pointer':''}">
+        ${foto?`<img src="${foto}" alt="">`:`<span>${ICO[p.s]||'📦'}</span>`}
+        ${!isBase?`<input type="file" accept="image/*" id="fi${sid}" onchange="saveFoto('${k}',this)">`:''}
+      </div>
+      <div class="ci-info">
+        <div class="ci-nm">${p.n}</div>
+        <div class="ci-mt">COD: ${p.c||'—'} · <span class="stag ${p.s}" style="font-size:.56rem">${p.s}</span></div>
+      </div>
+      ${!isBase?`<button class="ci-del" onclick="delProd('${k}')">🗑</button>`:`<span style="font-size:.58rem;color:var(--gray);flex-shrink:0">base</span>`}
+    </div>`;
+  }).join('');
+}
+async function saveFoto(k,inp){
+  if(!inp.files[0])return;
+  const r=new FileReader();
+  r.onload=async e=>{D.fotos[k]=e.target.result; await saveLocal(); renderCfg(); render(); toast('📸 Foto salva!','ok');};
+  r.readAsDataURL(inp.files[0]);
+}
+async function delProd(k){
+  if(!confirm('Remover produto?'))return;
+  const p=D.extra.find(x=>pk(x)===k);
+  try{
+    if(SUPA_OK&&p&&p._id) await sbDelete('produtos_extra',p._id);
+    D.extra=D.extra.filter(x=>pk(x)!==k);
+    delete Q[k]; await saveLocal(); renderCfg(); render(); upBar(); toast('Produto removido','er');
+  }catch(e){ toast('Erro ao remover','er'); }
+}
+function prevFoto(inp){
+  if(!inp.files[0])return;
+  const r=new FileReader();
+  r.onload=e=>{nFoto=e.target.result;document.getElementById('fprev').innerHTML=`<img src="${e.target.result}" alt=""><input type="file" id="fImg" accept="image/*" onchange="prevFoto(this)">`;};
+  r.readAsDataURL(inp.files[0]);
+}
+function clrFoto(){nFoto='';document.getElementById('fprev').innerHTML=`📷<input type="file" id="fImg" accept="image/*" onchange="prevFoto(this)">`;}
+async function addProd(){
+  const n=document.getElementById('nPNm').value.trim().toUpperCase();
+  const c=document.getElementById('nPCd').value.trim();
+  const s=document.getElementById('nPSt').value;
+  if(!n){toast('⚠️ Digite o nome','er');return;}
+  if(allProds().find(p=>p.n===n&&p.s===s)){toast('Produto já cadastrado','er');return;}
+  const p={c,n,s};
+  D.extra.push(p);
+  if(nFoto) D.fotos[pk(p)]=nFoto;
+  document.getElementById('nPNm').value='';
+  document.getElementById('nPCd').value='';
+  clrFoto(); tog('fProd');
+  await saveLocal(); renderCfg(); render(); toast(`✅ ${n} adicionado`,'ok');
+}
+
+// ═══ UTILS ═══
+function tog(id){document.getElementById(id).classList.toggle('on');}
+function dl(content,filename){
+  const b=new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'});
+  const u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=filename;a.click();URL.revokeObjectURL(u);
+}
+function toast(msg,t=''){
+  const el=document.getElementById('tst');
+  el.textContent=msg;el.className='tst on'+(t?' '+t:'');
+  setTimeout(()=>el.className='tst',2800);
+}
+</script>
+</body>
+</html>
